@@ -26,9 +26,11 @@ int main(int argc, char **argv){
 
   double f_0[N+1], f_1[N+1], f_2[N+1];
   double res[3][N];
+  double fac[N];
   dt = 0.1*(x[1]-x[0]);
   t = 0.0;
   tf = 0.1;
+  fac[0:N] = dt/(x[1:N] - x[0:N]);
   unsigned int start = 0;
   unsigned int length = N+1;
   unsigned int remainder;
@@ -40,17 +42,17 @@ int main(int argc, char **argv){
   {
     thread_id = omp_get_thread_num();
     thread_count = omp_get_num_threads();
-
+    length = (N + 1) / thread_count;
+    remainder = (N + 1) % thread_count;
+    if(thread_id < remainder){
+      length += 1;
+      start = thread_id*(length);
+    }
+    else{
+      start = thread_id*length + remainder;
+    }
     while(t<tf){
-      length = (N + 1) / thread_count;
-      remainder = (N + 1) % thread_count;
-      if(thread_id < remainder){
-	length += 1;
-	start = thread_id*(length);
-      }
-      else{
-	start = thread_id*length + remainder;
-      }
+
 #pragma omp barrier
       bc(N, U, rho, u, p, start, length);
 #pragma omp barrier
@@ -60,12 +62,7 @@ int main(int argc, char **argv){
 	      pl[start:length], pr[start:length], &f_0[start:length], &f_1[start:length], &f_2[start:length]);
       
 #pragma omp barrier
-      if(start + length >= N){
-	length = N - start;
-      }
-      U[0][start:length] += -(f_0[start+1:length] - f_0[start:length])/(x[start+1:length] - x[start:length])*dt;
-      U[1][start:length] += -(f_1[start+1:length] - f_1[start:length])/(x[start+1:length] - x[start:length])*dt;
-      U[2][start:length] += -(f_2[start+1:length] - f_2[start:length])/(x[start+1:length] - x[start:length])*dt;
+      update(N, U, f_0, f_1, f_2, fac, start, length);
       t += dt;
     }
   }
