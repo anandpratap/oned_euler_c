@@ -12,8 +12,8 @@ inline double my_clock(void) {
 }
 int main(int argc, char **argv){
 
-  int Ng, N;
-  int input;
+  unsigned int Ng, N;
+  unsigned int input;
   input = atoi(argv[1]);
   struct state left, right;
   read_inputs(&left, &right, &Ng);
@@ -32,11 +32,11 @@ int main(int argc, char **argv){
   dt = 0.1*(x[1]-x[0]);
   t = 0.0;
   tf = 2.2;
-  int start = 0;
-  int length = N+1;
-  int remainder;
-  int thread_id;
-  int thread_count;
+  unsigned int start = 0;
+  unsigned int length = N+1;
+  unsigned int remainder;
+  unsigned int thread_id;
+  unsigned int thread_count;
   double start_time, end_time;
   start_time = my_clock();
 #pragma omp parallel num_threads(input) private(thread_id, thread_count, start, length, remainder, t)
@@ -44,7 +44,7 @@ int main(int argc, char **argv){
     thread_id = omp_get_thread_num();
     thread_count = omp_get_num_threads();
 
-    for(int i=0; i< 10000; i++){
+    for(int i=0; i< 20000; i++){
       length = (N + 1) / thread_count;
       remainder = (N + 1) % thread_count;
       if(thread_id < remainder){
