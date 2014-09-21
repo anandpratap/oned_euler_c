@@ -1,10 +1,7 @@
-#include <iostream>
-#include <fstream>
 #include "omp.h"
 #include <sys/time.h>
+#include "include.h"
 
-#include "base.h"
-#include "io.h"
 inline double my_clock(void) {
   struct timeval t;
   gettimeofday(&t, NULL);
@@ -31,7 +28,7 @@ int main(int argc, char **argv){
   double res[3][N];
   dt = 0.1*(x[1]-x[0]);
   t = 0.0;
-  tf = 2.2;
+  tf = 0.1;
   unsigned int start = 0;
   unsigned int length = N+1;
   unsigned int remainder;
@@ -44,7 +41,7 @@ int main(int argc, char **argv){
     thread_id = omp_get_thread_num();
     thread_count = omp_get_num_threads();
 
-    for(int i=0; i< 20000; i++){
+    while(t<tf){
       length = (N + 1) / thread_count;
       remainder = (N + 1) % thread_count;
       if(thread_id < remainder){
